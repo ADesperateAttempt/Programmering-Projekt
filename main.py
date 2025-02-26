@@ -16,6 +16,7 @@ def get_flight_data():
 
     if response.status_code == 200:
         data = response.json()
+        flights = data.get('data', [])
         return render_template_string("""
             <!doctype html>
             <html lang="en">
@@ -23,13 +24,48 @@ def get_flight_data():
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
                 <title>Flight Data</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 20px;
+                        background-color: #f4f4f9;
+                    }
+                    h1 {
+                        color: #333;
+                    }
+                    .flight {
+                        background-color: #fff;
+                        padding: 10px;
+                        border: 1px solid #ddd;
+                        border-radius: 5px;
+                        margin-bottom: 20px;
+                    }
+                    .flight h2 {
+                        margin-top: 0;
+                    }
+                </style>
               </head>
               <body>
                 <h1>Flight Data</h1>
-                <pre>{{ data | tojson(indent=2) }}</pre>
+                {% for flight in flights %}
+                <div class="flight">
+                    <h2>Flight: {{ flight.flight.iata }} ({{ flight.flight.number }})</h2>
+                    <p><strong>Airline:</strong> {{ flight.airline.name }}</p>
+                    <p><strong>Flight Date:</strong> {{ flight.flight_date }}</p>
+                    <p><strong>Flight Status:</strong> {{ flight.flight_status }}</p>
+                    <h3>Departure</h3>
+                    <p><strong>Airport:</strong> {{ flight.departure.airport }}</p>
+                    <p><strong>Scheduled:</strong> {{ flight.departure.scheduled }}</p>
+                    <p><strong>Estimated:</strong> {{ flight.departure.estimated }}</p>
+                    <h3>Arrival</h3>
+                    <p><strong>Airport:</strong> {{ flight.arrival.airport }}</p>
+                    <p><strong>Scheduled:</strong> {{ flight.arrival.scheduled }}</p>
+                    <p><strong>Estimated:</strong> {{ flight.arrival.estimated }}</p>
+                </div>
+                {% endfor %}
               </body>
             </html>
-        """, data=data)
+        """, flights=flights)
     else:
         return f"Error: {response.status_code} - {response.text}", response.status_code
 
